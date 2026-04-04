@@ -4,11 +4,16 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"time"
+
+	"github.com/mathias-schnell/godex/internal/pokecache"
 )
 
 func main() {
 	c := &config{
-		Next:     "https://pokeapi.co/api/v2/location-area/",
+		cache:    pokecache.NewCache(5 * time.Minute),
+		apiURL:   "https://pokeapi.co/api/v2/",
+		Next:     "",
 		Previous: "",
 	}
 	scanner := bufio.NewScanner(os.Stdin)
@@ -16,29 +21,21 @@ func main() {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
 		text := cleanInput(scanner.Text())
-		switch text[0] {
-		case "exit":
-			err := validCommands["exit"].callback(c)
-			if err != nil {
-				fmt.Println("Error executing command:", err)
-			}
-		case "help":
-			err := validCommands["help"].callback(c)
-			if err != nil {
-				fmt.Println("Error executing command:", err)
-			}
-		case "map":
-			err := validCommands["map"].callback(c)
-			if err != nil {
-				fmt.Println("Error executing command:", err)
-			}
-		case "mapb":
-			err := validCommands["mapb"].callback(c)
-			if err != nil {
-				fmt.Println("Error executing command:", err)
-			}
-		default:
-			fmt.Printf("Unknown command")
+		if len(text) == 0 {
+			continue
+		}
+		command := text[0]
+		args := text[1:]
+
+		cmd, ok := validCommands[command]
+		if !ok {
+			fmt.Println("Unknown command")
+			continue
+		}
+
+		err := cmd.callback(c, args)
+		if err != nil {
+			fmt.Println("Error executing command:", err)
 		}
 	}
 }
