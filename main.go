@@ -11,6 +11,7 @@ import (
 
 func main() {
 	c := &config{
+		pokedex:  make(map[string]pokemon_info),
 		cache:    pokecache.NewCache(5 * time.Minute),
 		apiURL:   "https://pokeapi.co/api/v2/",
 		Next:     "",
