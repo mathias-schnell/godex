@@ -113,6 +113,11 @@ func init() {
 		description: "Displays the previous 20 areas",
 		callback:    commandMapBack,
 	}
+	validCommands["pokedex"] = cliCommand{
+		name:        "pokedex",
+		description: "Displays the list of Pokemon you've caught",
+		callback:    commandPokedex,
+	}
 }
 
 // a function that takes a string input and returns a slice of strings with the cleaned input
@@ -143,6 +148,7 @@ func commandCatch(c *config, args []string) error {
 	catch_threshold := math.Pow(math.Log(float64(pokemon_info.BaseExperience)), 2) * 2.0
 	if catch_attempt > catch_threshold {
 		fmt.Printf("%s was caught!\n", pokemon_info.Name)
+		fmt.Printf("You may now inspect %s with the 'inspect' command.\n", pokemon_info.Name)
 		c.pokedex[pokemon_info.Name] = pokemon_info
 	} else {
 		fmt.Printf("%s escaped!\n", pokemon_info.Name)
@@ -312,6 +318,20 @@ func getPokeapiData(url string, poke_struct any, c *config) error {
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// a function that handles the "pokedex" command
+func commandPokedex(c *config, args []string) error {
+	if len(c.pokedex) == 0 {
+		fmt.Println("You haven't caught any Pokemon yet!")
+		return nil
+	}
+
+	fmt.Println("Your Pokedex:")
+	for name := range c.pokedex {
+		fmt.Printf(" - %s\n", name)
 	}
 	return nil
 }
